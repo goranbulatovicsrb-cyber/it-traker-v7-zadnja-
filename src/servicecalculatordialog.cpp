@@ -58,9 +58,9 @@ void ServiceCalculatorDialog::buildUi()
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
     m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
-    m_table->setColumnWidth(1, 130);
-    m_table->setColumnWidth(2, 80);
-    m_table->setColumnWidth(3, 160);
+    m_table->setColumnWidth(1, 140);
+    m_table->setColumnWidth(2, 110);
+    m_table->setColumnWidth(3, 170);
     m_table->verticalHeader()->setVisible(false);
     m_table->setAlternatingRowColors(true);
     m_table->setShowGrid(false);
@@ -179,16 +179,21 @@ void ServiceCalculatorDialog::buildUi()
 
 void ServiceCalculatorDialog::addPart()
 {
+    m_table->blockSignals(true);
     int row = m_table->rowCount();
     m_table->insertRow(row);
+    m_table->setRowHeight(row, 36);
 
+    // Col 0: Name (editable)
     auto* namItem = new QTableWidgetItem("Naziv dijela");
     namItem->setForeground(QColor("#f0f6fc"));
     m_table->setItem(row, 0, namItem);
 
-    // Cost spin
+    // Col 1: Cost spinbox
     auto* costSpin = new QDoubleSpinBox;
-    costSpin->setRange(0, 99999); costSpin->setSuffix(" €"); costSpin->setValue(0);
+    costSpin->setRange(0, 99999);
+    costSpin->setSuffix(" €");
+    costSpin->setValue(0);
     costSpin->setFixedHeight(32);
     costSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
     costSpin->setStyleSheet(R"(
@@ -198,9 +203,11 @@ void ServiceCalculatorDialog::addPart()
     )");
     m_table->setCellWidget(row, 1, costSpin);
 
-    // Margin spin (inherits global margin)
+    // Col 2: Margin spinbox
     auto* marginSpin = new QDoubleSpinBox;
-    marginSpin->setRange(0, 200); marginSpin->setSuffix(" %"); marginSpin->setValue(m_spnMargin->value());
+    marginSpin->setRange(0, 200);
+    marginSpin->setSuffix(" %");
+    marginSpin->setValue(m_spnMargin->value());
     marginSpin->setFixedHeight(32);
     marginSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
     marginSpin->setStyleSheet(R"(
@@ -208,17 +215,22 @@ void ServiceCalculatorDialog::addPart()
             border:1px solid #30363d; border-radius:4px; padding:4px 8px; }
         QDoubleSpinBox:focus { border-color:#58a6ff; }
     )");
+    m_table->setCellWidget(row, 2, marginSpin);
 
-    // Price (read-only)
+    // Col 3: Price for client (read-only, calculated)
     auto* priceItem = new QTableWidgetItem("0.00 €");
     priceItem->setForeground(QColor(Style::GREEN));
     priceItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     QFont f; f.setBold(true); priceItem->setFont(f);
-    priceItem->setFlags(priceItem->flags() & ~Qt::ItemIsEditable);
+    priceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable); // read-only
     m_table->setItem(row, 3, priceItem);
 
-    connect(costSpin,   qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ServiceCalculatorDialog::recalculate);
-    connect(marginSpin, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ServiceCalculatorDialog::recalculate);
+    m_table->blockSignals(false);
+
+    connect(costSpin,   qOverload<double>(&QDoubleSpinBox::valueChanged),
+            this, &ServiceCalculatorDialog::recalculate);
+    connect(marginSpin, qOverload<double>(&QDoubleSpinBox::valueChanged),
+            this, &ServiceCalculatorDialog::recalculate);
 }
 
 void ServiceCalculatorDialog::removePart()
