@@ -82,12 +82,21 @@ void ServiceCalculatorDialog::buildUi()
     auto* settingsRow = new QHBoxLayout;
     settingsRow->setSpacing(20);
 
+    QString spinStyle = R"(
+        QDoubleSpinBox { background:#0d1117; color:#f0f6fc;
+            border:1px solid #30363d; border-radius:6px; padding:5px 8px; }
+        QDoubleSpinBox:focus { border-color:#58a6ff; }
+        QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+            background:#21262d; border:none; border-radius:3px; width:16px; }
+    )";
+
     // Labor
     auto* laborGroup = new QGroupBox("👨‍🔧  Rad / Usluga");
     laborGroup->setStyleSheet("QGroupBox { color:#8b949e; border:1px solid #30363d; border-radius:6px; margin-top:12px; padding-top:8px; } QGroupBox::title { subcontrol-origin:margin; padding:0 6px; }");
     auto* laborLay = new QFormLayout(laborGroup);
     m_spnLabor = new QDoubleSpinBox;
     m_spnLabor->setRange(0, 9999); m_spnLabor->setSuffix(" €"); m_spnLabor->setValue(20);
+    m_spnLabor->setStyleSheet(spinStyle);
     laborLay->addRow("Cijena rada:", m_spnLabor);
     settingsRow->addWidget(laborGroup);
 
@@ -97,6 +106,7 @@ void ServiceCalculatorDialog::buildUi()
     auto* marginLay = new QFormLayout(marginGroup);
     m_spnMargin = new QDoubleSpinBox;
     m_spnMargin->setRange(0, 200); m_spnMargin->setSuffix(" %"); m_spnMargin->setValue(20);
+    m_spnMargin->setStyleSheet(spinStyle);
     marginLay->addRow("Marža na dijelove:", m_spnMargin);
     settingsRow->addWidget(marginGroup);
 
@@ -106,6 +116,7 @@ void ServiceCalculatorDialog::buildUi()
     auto* discLay = new QFormLayout(discGroup);
     m_spnDiscount = new QDoubleSpinBox;
     m_spnDiscount->setRange(0, 100); m_spnDiscount->setSuffix(" %"); m_spnDiscount->setValue(0);
+    m_spnDiscount->setStyleSheet(spinStyle);
     discLay->addRow("Popust:", m_spnDiscount);
     settingsRow->addWidget(discGroup);
 
@@ -178,14 +189,25 @@ void ServiceCalculatorDialog::addPart()
     // Cost spin
     auto* costSpin = new QDoubleSpinBox;
     costSpin->setRange(0, 99999); costSpin->setSuffix(" €"); costSpin->setValue(0);
-    costSpin->setStyleSheet("background:#0d1117; color:#f0f6fc; border:none; padding:4px;");
+    costSpin->setFixedHeight(32);
+    costSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    costSpin->setStyleSheet(R"(
+        QDoubleSpinBox { background:#0d1117; color:#f0f6fc;
+            border:1px solid #30363d; border-radius:4px; padding:4px 8px; }
+        QDoubleSpinBox:focus { border-color:#58a6ff; }
+    )");
     m_table->setCellWidget(row, 1, costSpin);
 
     // Margin spin (inherits global margin)
     auto* marginSpin = new QDoubleSpinBox;
     marginSpin->setRange(0, 200); marginSpin->setSuffix(" %"); marginSpin->setValue(m_spnMargin->value());
-    marginSpin->setStyleSheet("background:#0d1117; color:#f0f6fc; border:none; padding:4px;");
-    m_table->setCellWidget(row, 2, marginSpin);
+    marginSpin->setFixedHeight(32);
+    marginSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    marginSpin->setStyleSheet(R"(
+        QDoubleSpinBox { background:#0d1117; color:#f0f6fc;
+            border:1px solid #30363d; border-radius:4px; padding:4px 8px; }
+        QDoubleSpinBox:focus { border-color:#58a6ff; }
+    )");
 
     // Price (read-only)
     auto* priceItem = new QTableWidgetItem("0.00 €");
